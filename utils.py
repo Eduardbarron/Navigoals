@@ -1,4 +1,5 @@
 import datetime
+from tabulate import tabulate
 
 # Utils module for handling common interactions
 
@@ -96,3 +97,34 @@ def select_time():
 
     print("Returning to main menu.")
     return None
+
+def calculate_efficiency(tasks):
+    """Calculate efficiency and task metrics."""
+    efficiency_tasks = [task for task in tasks if task[3] in ["Done ✅", "Pending", "Failed ❌"]]
+    completed_tasks = sum(1 for task in efficiency_tasks if task[3] == "Done ✅")
+    failed_tasks = sum(1 for task in efficiency_tasks if task[3] in ["Pending", "Failed ❌"])
+    moved_or_cancelled = len(tasks) - len(efficiency_tasks)
+
+    efficiency = (completed_tasks / len(efficiency_tasks) * 100) if efficiency_tasks else 0
+
+    return {
+        "total_tasks": len(tasks),
+        "completed_tasks": completed_tasks,
+        "failed_tasks": failed_tasks,
+        "moved_or_cancelled": moved_or_cancelled,
+        "efficiency": efficiency
+    }
+
+def format_report(metrics, tasks):
+    """Format and print the report."""
+    print("\nReport Summary")
+    print("===============")
+    print(f"Total Tasks: {metrics['total_tasks']}")
+    print(f"Completed Tasks: {metrics['completed_tasks']}")
+    print(f"Failed Tasks: {metrics['failed_tasks']}")
+    print(f"Moved/Cancelled Tasks: {metrics['moved_or_cancelled']}")
+    print(f"Efficiency: {metrics['efficiency']:.2f}%")
+
+    headers = ["Daily ID", "Name", "Category", "Status", "Date"]
+    print("\nTask Details:")
+    print(tabulate(tasks, headers=headers, tablefmt="pretty"))

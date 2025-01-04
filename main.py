@@ -1,7 +1,21 @@
-# Import the necessary modules
-from utils import select_task, select_task_type, select_time  # Utility functions
-from db_utils import add_task, get_tasks_by_date, update_task_status, delete_task, get_master_list, get_waiting_list  # Placeholder for TASK operations
-# Import additional functions as needed (e.g., reports)
+from utils import (
+    select_task, 
+    select_task_type, 
+    select_time, 
+    calculate_efficiency, 
+    format_report
+)  # Utility functions
+
+from db_utils import (
+    add_task, 
+    get_tasks_by_date, 
+    update_task_status, 
+    delete_task, 
+    get_master_list, 
+    get_waiting_list, 
+    get_tasks_by_range,
+)  # Database operations
+
 import datetime  # Module for working with dates
 from tabulate import tabulate  # For displaying tables
 
@@ -81,8 +95,7 @@ def view_reports():
         print("1 Daily Report")
         print("2 Weekly Report")
         print("3 Monthly Report")
-        print("4 See Log")
-        print("5 Back to Main Menu")
+        print("4 Back to Main Menu")
         choice = input("Select an option: ").strip()
 
         if choice == "1":
@@ -92,8 +105,6 @@ def view_reports():
         elif choice == "3":
             monthly_report()
         elif choice == "4":
-            see_log()
-        elif choice == "5":
             return
         else:
             print("❌ Invalid option, please try again.")
@@ -358,27 +369,108 @@ def watch_list_menu():
 # Placeholder Functions for Reports
 def daily_report():
     """Generate a daily report."""
-    print("\n📅 Generating daily report...")
-    # You will call get_tasks_by_date() or similar here
-    pass
+    print("\nGenerating daily report...")
+    print("1. Today")
+    print("2. Yesterday")
+    print("3. Select Date")
+    choice = input("Choose an option: ").strip()
+
+    if choice == "1":
+        report_date = datetime.date.today()
+    elif choice == "2":
+        report_date = datetime.date.today() - datetime.timedelta(days=1)
+    elif choice == "3":
+        report_date = input("Enter the date (YYYY-MM-DD): ").strip()
+        try:
+            report_date = datetime.datetime.strptime(report_date, "%Y-%m-%d").date()
+        except ValueError:
+            print("Invalid date format. Please try again.")
+            return
+    else:
+        print("Invalid option. Returning to Reports Menu.")
+        return
+
+    # Fetch tasks for the selected date
+    tasks = get_tasks_by_date(report_date.isoformat())
+
+    if not tasks:
+        print(f"No tasks found for {report_date}.")
+        return
+
+    # Calculate metrics and format report
+    metrics = calculate_efficiency(tasks)
+    format_report(metrics, tasks)
 
 def weekly_report():
     """Generate a weekly report."""
-    print("\n📅 Generating weekly report...")
-    # Logic to fetch tasks for the week
-    pass
+    print("\nGenerating weekly report...")
+    print("1. Current Week")
+    print("2. Select Start Date for Week")
+    choice = input("Choose an option: ").strip()
+
+    if choice == "1":
+        today = datetime.date.today()
+        start_of_week = today - datetime.timedelta(days=today.weekday())  # Monday
+        end_of_week = start_of_week + datetime.timedelta(days=6)  # Sunday
+    elif choice == "2":
+        start_date = input("Enter the start date (YYYY-MM-DD): ").strip()
+        try:
+            start_of_week = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
+            end_of_week = start_of_week + datetime.timedelta(days=6)
+        except ValueError:
+            print("Invalid date format. Please try again.")
+            return
+    else:
+        print("Invalid option. Returning to Reports Menu.")
+        return
+
+    # Fetch tasks for the week
+    tasks = get_tasks_by_range(start_of_week.isoformat(), end_of_week.isoformat())
+
+    if not tasks:
+        print(f"No tasks found from {start_of_week} to {end_of_week}.")
+        return
+
+    # Calculate metrics and format report
+    metrics = calculate_efficiency(tasks)
+    print(f"\nWeekly Report ({start_of_week} to {end_of_week})")
+    format_report(metrics, tasks)
+
 
 def monthly_report():
     """Generate a monthly report."""
-    print("\n📅 Generating monthly report...")
-    # Logic to fetch tasks for the month
-    pass
+    print("\nGenerating monthly report...")
+    print("1. Current Month")
+    print("2. Select Month and Year")
+    choice = input("Choose an option: ").strip()
 
-def see_log():
-    """View the activity log."""
-    print("\n📜 Viewing the log...")
-    # Logic to fetch and display log entries
-    pass
+    if choice == "1":
+        today = datetime.date.today()
+        start_of_month = today.replace(day=1)
+        end_of_month = (start_of_month + datetime.timedelta(days=31)).replace(day=1) - datetime.timedelta(days=1)
+    elif choice == "2":
+        month_year = input("Enter the month and year (MM-YYYY): ").strip()
+        try:
+            start_of_month = datetime.datetime.strptime(month_year, "%m-%Y").date().replace(day=1)
+            end_of_month = (start_of_month + datetime.timedelta(days=31)).replace(day=1) - datetime.timedelta(days=1)
+        except ValueError:
+            print("Invalid date format. Please try again.")
+            return
+    else:
+        print("Invalid option. Returning to Reports Menu.")
+        return
+
+    # Fetch tasks for the month
+    tasks = get_tasks_by_range(start_of_month.isoformat(), end_of_month.isoformat())
+
+    if not tasks:
+        print(f"No tasks found from {start_of_month} to {end_of_month}.")
+        return
+
+    # Calculate metrics and format report
+    metrics = calculate_efficiency(tasks)
+    print(f"\nMonthly Report ({start_of_month} to {end_of_month})")
+    format_report(metrics, tasks)
 
 # Entry Point
 if __name__ == "__main__":

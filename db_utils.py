@@ -78,3 +78,13 @@ def get_waiting_list(db_name="navigoals.db"):
     query = "SELECT id, name, category FROM waiting_list"
     return execute_query(query, (), db_name)
 
+def get_tasks_by_range(start_date, end_date, db_name="navigoals.db"):
+    """Fetch tasks within a specific date range."""
+    query = """
+    SELECT daily_id, name, category, status, date 
+    FROM tasks
+    WHERE date BETWEEN ? AND ?
+    ORDER BY date, daily_id
+    """
+    return execute_query(query, (start_date, end_date), db_name)
+
