@@ -289,7 +289,27 @@ def watch_list_menu():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            date = input("Enter the date (YYYY-MM-DD): ").strip()
+            print("\nSelect a Date:")
+            print("1. Tomorrow")
+            print("2. Yesterday")
+            print("3. Select Date")
+            date_choice = input("Choose an option: ").strip()
+
+            if date_choice == "1":
+                date = (datetime.date.today() + datetime.timedelta(days=1)).isoformat()
+            elif date_choice == "2":
+                date = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
+            elif date_choice == "3":
+                date = input("Enter the date (YYYY-MM-DD): ").strip()
+                try:
+                    datetime.datetime.strptime(date, "%Y-%m-%d")  # Validate date format
+                except ValueError:
+                    print("Invalid date format. Please try again.")
+                    continue
+            else:
+                print("Invalid option. Returning to Watch List Menu.")
+                continue
+
             tasks = get_tasks_by_date(date)
             if tasks:
                 print("\nTasks for the day:")
@@ -298,7 +318,6 @@ def watch_list_menu():
                 print(tabulate(formatted_tasks, headers=headers, tablefmt="pretty"))
             else:
                 print("No tasks found for this day.")
-
         elif choice == "2":
             print("\n📚 Viewing the Master List...")
             master_tasks = get_master_list()
