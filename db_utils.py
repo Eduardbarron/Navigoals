@@ -1,10 +1,15 @@
 import sqlite3
+import os
 
-def connect_to_db(db_name="navigoals.db"):
+# Get the directory of the current script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "navigoals.db")
+
+def connect_to_db(db_name=DB_PATH):
     """Establish a connection to the SQLite database."""
     return sqlite3.connect(db_name)
 
-def execute_query(query, params=(), db_name="navigoals.db"):
+def execute_query(query, params=(), db_name=DB_PATH):
     """Execute a query with optional parameters."""
     try:
         with connect_to_db(db_name) as conn:
@@ -16,7 +21,7 @@ def execute_query(query, params=(), db_name="navigoals.db"):
         print(f"An error occurred: {e}")
         return None
 
-def add_task(name, category, date=None, list_type="daily", db_name="navigoals.db"):
+def add_task(name, category, date=None, list_type="daily", db_name=DB_PATH):
     """Add a task to the specified list."""
     if list_type == "daily":
         # Calculate the next daily_id for the given date
@@ -45,13 +50,12 @@ def add_task(name, category, date=None, list_type="daily", db_name="navigoals.db
         """
         execute_query(query, (name, category), db_name)
 
-
-def get_tasks_by_date(date, db_name="navigoals.db"):
+def get_tasks_by_date(date, db_name=DB_PATH):
     """Retrieve tasks for a specific date."""
     query = "SELECT daily_id, name, category, status FROM tasks WHERE date = ? ORDER BY daily_id"
     return execute_query(query, (date,), db_name)
 
-def update_task_status(daily_id, status, date, db_name="navigoals.db"):
+def update_task_status(daily_id, status, date, db_name=DB_PATH):
     """Update the status of a task in the database."""
     query = "UPDATE tasks SET status = ? WHERE daily_id = ? AND date = ?"
     try:
@@ -62,23 +66,22 @@ def update_task_status(daily_id, status, date, db_name="navigoals.db"):
     except sqlite3.Error as e:
         print(f"Error updating task: {e}")
 
-def delete_task(task_id, table="tasks", db_name="navigoals.db"):
+def delete_task(task_id, table="tasks", db_name=DB_PATH):
     """Delete a task from the specified table."""
     query = f"DELETE FROM {table} WHERE id = ?"
     execute_query(query, (task_id,), db_name)
 
-
-def get_master_list(db_name="navigoals.db"):
+def get_master_list(db_name=DB_PATH):
     """Retrieve all tasks from the Master List."""
     query = "SELECT id, name, category FROM master_list"
     return execute_query(query, (), db_name)
 
-def get_waiting_list(db_name="navigoals.db"):
+def get_waiting_list(db_name=DB_PATH):
     """Retrieve all tasks from the Waiting List."""
     query = "SELECT id, name, category FROM waiting_list"
     return execute_query(query, (), db_name)
 
-def get_tasks_by_range(start_date, end_date, db_name="navigoals.db"):
+def get_tasks_by_range(start_date, end_date, db_name=DB_PATH):
     """Fetch tasks within a specific date range."""
     query = """
     SELECT daily_id, name, category, status, date 
@@ -87,4 +90,3 @@ def get_tasks_by_range(start_date, end_date, db_name="navigoals.db"):
     ORDER BY date, daily_id
     """
     return execute_query(query, (start_date, end_date), db_name)
-
