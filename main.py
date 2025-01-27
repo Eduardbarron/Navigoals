@@ -27,14 +27,13 @@ def main_menu():
 
         # Fetch today's tasks
         today = datetime.date.today().isoformat()  # Fetch current date in YYYY-MM-DD format
-        print()
         print(f"Today is {today}")
-        print()
 
         tasks = get_tasks_by_date(today)
 
         if tasks:
-            print("\nToday's Goals 🗓️")
+            metrics = calculate_efficiency(tasks)  # Calculate efficiency
+            print(f"\nToday's Goals 🗓️  Today's Efficiency: {metrics['efficiency']:.2f}% {metrics['emoji']}")
             # Display tasks as a table with column headers
             headers = ["Daily ID", "Name", "Category", "Status"]
             formatted_tasks = [(task[0], task[1], task[2], task[3]) for task in tasks]  # Extract relevant columns

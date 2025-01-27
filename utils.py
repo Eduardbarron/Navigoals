@@ -100,20 +100,37 @@ def select_time():
 
 def calculate_efficiency(tasks):
     """Calculate efficiency and task metrics."""
-    efficiency_tasks = [task for task in tasks if task[3] in ["Done ✅", "Pending", "Failed ❌"]]
+    # Treat all "Pending" tasks as "Failed ❌" for efficiency calculation
+    efficiency_tasks = [task for task in tasks if task[3] in ["Done ✅", "pending", "Failed ❌"]]
     completed_tasks = sum(1 for task in efficiency_tasks if task[3] == "Done ✅")
-    failed_tasks = sum(1 for task in efficiency_tasks if task[3] in ["Pending", "Failed ❌"])
+    failed_tasks = sum(1 for task in efficiency_tasks if task[3] in ["pending", "Failed ❌"])
     moved_or_cancelled = len(tasks) - len(efficiency_tasks)
 
+    # Efficiency is calculated based on "Done ✅" tasks only
     efficiency = (completed_tasks / len(efficiency_tasks) * 100) if efficiency_tasks else 0
 
+    emoji = ""
+    if efficiency == 0:
+        emoji = "⚪"  # No progress
+    elif efficiency < 50:
+        emoji = "🟥"  # Red square
+    elif 50 <= efficiency <= 80:
+        emoji = "🟧"  # Orange square
+    elif 81 <= efficiency <= 95:
+        emoji = "🟩"  # Green square
+    elif 96 <= efficiency <= 100:
+        emoji = "🌟"  # star
+    
     return {
         "total_tasks": len(tasks),
         "completed_tasks": completed_tasks,
         "failed_tasks": failed_tasks,
         "moved_or_cancelled": moved_or_cancelled,
-        "efficiency": efficiency
+        "efficiency": efficiency,
+        "emoji": emoji
     }
+
+
 
 def format_report(metrics, tasks):
     """Format and print the report."""
