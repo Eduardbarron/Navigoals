@@ -131,7 +131,7 @@ If you have feedback, ideas, or simply want to connect, feel free to reach out:
 - **Email**: [xeduardo.barron@gmail.com]
 - **GitHub**: [https://github.com/Eduardbarron]
 
-If you found this project useful and want to support future developments, consider buying me coding fuel (aka coffee) at  
+If you found this project useful and want to support future developments, please consider buying me coding fuel (aka coffee) at  
 [Buy Me a Coffee](https://www.buymeacoffee.com/Eduardbarron) (optional, but greatly appreciated!)
 
 Thank you for exploring Navigoals. I hope it's useful to you.
