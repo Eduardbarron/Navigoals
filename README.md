@@ -107,6 +107,8 @@ python main.py
 
 Navigoals is a productivity tool designed to help users manage their daily, weekly, and monthly tasks efficiently. It tracks task completion, calculates efficiency scores, and provides detailed reports to help users improve their productivity over time.
 
+## FUTURE
+-Make it able to copy from any list, not just today list
 
 ## License
 

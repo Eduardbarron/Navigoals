@@ -18,29 +18,34 @@ from db_utils import (
 
 import datetime  # Module for working with dates
 from tabulate import tabulate  # For displaying tables
+import os
 
 def main_menu():
     """Main menu of the program."""
     while True:
-        print("\n🌟 Welcome to Navigoals! 🌟")
+
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+        print("\n🌟 \033[93m Welcome to Navigoals! \033[0m🌟")
         print()
 
-        # Fetch today's tasks
-        today = datetime.date.today().isoformat()  # Fetch current date in YYYY-MM-DD format
-        print(f"Today is {today}")
+        # Fetch today's and yesterday's tasks
+        for offset, label in [(1, "Yesterday"), (0, "Today")]:
+            day = datetime.date.today() - datetime.timedelta(days=offset)
+            day_str = day.isoformat()
+            print(f"\033[91m{label}\033[0m {day_str}")
 
-        tasks = get_tasks_by_date(today)
+            tasks = get_tasks_by_date(day_str)
 
-        if tasks:
-            metrics = calculate_efficiency(tasks)  # Calculate efficiency
-            print(f"\nToday's Goals 🗓️  Today's Efficiency: {metrics['efficiency']:.2f}% {metrics['emoji']}")
-            # Display tasks as a table with column headers
-            headers = ["Daily ID", "Name", "Category", "Status"]
-            formatted_tasks = [(task[0], task[1], task[2], task[3]) for task in tasks]  # Extract relevant columns
-            print(tabulate(formatted_tasks, headers=headers, tablefmt="pretty"))
-        else:
-            print("No goals today 📭")
-
+            if tasks:
+                metrics = calculate_efficiency(tasks)
+                print(f"\033[91m{label}'s Efficiency:\033[0m {metrics['efficiency']:.2f}% {metrics['emoji']}")
+                headers = ["\033[94mDaily ID", "Name", "Category", "Status\033[0m"]
+                formatted_tasks = [(task[0], task[1], task[2], task[3]) for task in tasks]
+                print(tabulate(formatted_tasks, headers=headers, tablefmt="pretty"))
+            else:
+                print(f"No goals for {label.lower()} \U0001F4E5\n")
+       
         print()
         print("1. Manage Tasks 📝")
         print("2. View Reports 📊")
@@ -144,11 +149,20 @@ def add_task_menu():
     else:
         print("❌ Invalid option. Task not added.")
 
+def choose_day(label="update"):
+    print(f"\nWhich day's tasks would you like to {label}?")
+    print("1) Today")
+    print("2) Yesterday")
+    day_choice = input("Choose: ").strip()
+    if day_choice == "2":
+        return (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
+    return datetime.date.today().isoformat()
+
 def update_task_menu():
     """Update one or multiple existing tasks."""
-    print("\n✏️ Updating tasks...")
-    today = datetime.date.today().isoformat()
-    tasks = get_tasks_by_date(today)
+    print("\n\u270F\uFE0F Updating tasks...")
+    date_str = choose_day("update")
+    tasks = get_tasks_by_date(date_str)
 
     if not tasks:
         print("No tasks available to update.")
@@ -172,22 +186,23 @@ def update_task_menu():
     if new_status:
         for task in tasks_to_update:
             daily_id = task[0]  # Extract Daily ID
-            update_task_status(daily_id, new_status, today)  # Pass daily_id and date
+            update_task_status(daily_id, new_status, date_str)  # Pass daily_id and date
             print(f"✅ Task '{task[1]}' updated successfully to '{new_status}'.")
     else:
         print("❌ Update canceled due to invalid input.")
 
 def delete_task_menu():
     """Delete one or multiple tasks."""
-    print("\n🗑️ Deleting tasks...")
-    print("1. Delete from Today's Tasks")
+    print("\n\U0001F5D1️ Deleting tasks...")
+    print("1. Delete from Today's or Yesterday's Tasks")
     print("2. Delete from Master List")
     print("3. Delete from Waiting List")
     print("4. Back to Main Menu")
     choice = input("Select an option: ").strip()
 
     if choice == "1":
-        tasks = get_tasks_by_date(datetime.date.today().isoformat())
+        date_str = choose_day("delete")
+        tasks = get_tasks_by_date(date_str)
         if not tasks:
             print("No tasks available to delete.")
             return
@@ -207,7 +222,7 @@ def delete_task_menu():
                 print(f"❌ Task '{task[1]}' delete canceled.")
 
     elif choice == "2":
-        print("\n📚 Deleting from Master List...")
+        print("\n\U0001F4DA Deleting from Master List...")
         master_tasks = get_master_list()
         if not master_tasks:
             print("No tasks available in the Master List.")
@@ -256,8 +271,9 @@ def delete_task_menu():
 
 def copy_task_menu():
     """Copy one or multiple existing tasks."""
-    print("\n📋 Copying tasks...")
-    tasks = get_tasks_by_date(datetime.date.today().isoformat())
+    print("\n\U0001F4CB Copying tasks...")
+    date_str = choose_day("copy")
+    tasks = get_tasks_by_date(date_str)
 
     if not tasks:
         print("No tasks available to copy.")
@@ -275,7 +291,7 @@ def copy_task_menu():
             print(f"✅ Task '{task[1]}' copied successfully to {new_time}.")
     else:
         print("❌ Copy canceled due to invalid input.")
-
+        
 def watch_list_menu():
     """Submenu for viewing different task lists."""
     while True:
